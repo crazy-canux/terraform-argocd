@@ -1,0 +1,98 @@
+global:
+  image:
+    repository: quay.io/argoproj/argocd
+    tag: "v2.6.0-rc1"
+  logging:
+    level: debug
+
+# because the helm chart does not have yet the 2.6 crds:
+# let's do manual for now
+# kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/v2.6.0-rc1/manifests/install.yaml
+crds:
+  install: false
+
+configs:
+  secret:
+
+  ## ArgoCD config
+  cm:
+    application.instanceLabelKey: argocd.argoproj.io/instance
+
+  repositories:
+    banzaicloud-stable:
+      type: helm
+      url:  "https://kubernetes-charts.banzaicloud.com/branch/master"
+    bitnami:
+      type: helm
+      url:  "https://charts.bitnami.com/bitnami"
+    jfrog:
+      type: helm
+      url:  "https://charts.jfrog.io/"
+    hashicorp:
+      type: helm
+      url:  "https://helm.releases.hashicorp.com"
+    prometheus-community:
+      type: helm
+      name: prometheus-community
+      url:  "https://prometheus-community.github.io/helm-charts"
+    jetstack:
+      type: helm
+      url:  "https://charts.jetstack.io"
+
+dex:
+  enabled: false
+
+controller:
+  enableStatefulSet: true
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+redis:
+  enabled: true
+  image:
+    repository: redis
+    tag: 7.0.5-alpine
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+repoServer:
+  replicas: 2
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
+
+server:
+  replicas: 2
+  env:
+    - name: ARGOCD_API_SERVER_REPLICAS
+      value: '2'
+
+  metrics:
+    enabled: true
+
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+applicationSet:
+  enabled: true
+  metrics:
+    enabled: true
